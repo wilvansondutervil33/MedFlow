@@ -8,9 +8,12 @@ import EquipmentGrid from './compenents/equipment/equipmentGrid.jsx';
 import OrderGrid from './compenents/order/orderGrid.jsx';
 import ReportGrid from './compenents/report/reportGrid.jsx';
 import UserDataGrid from './compenents/user/userGrid.jsx';
-import BusinessDataGrid from './compenents/analityics/analyticsGrid.jsx';
+import SigleHospital from './compenents/hospital/singlehosital.jsx';
+import BusinessDataGrid from './compenents/analityics/bussGrid.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import AppHeader from './compenents/layout/AppHeader.jsx';
+import AnalyticsPage from './compenents/analityics/analityicsGrid.jsx';
+
 
 
 function Dashboard(){
@@ -30,38 +33,17 @@ function Dashboard(){
               <Box sx={{md:4}}>
                 <HospitalGrid onSuccess={setNotification} role={user?.role}/>
               </Box>
-              <Typography variant='h5' component="h2" gutterBottom>
-                Equipments
-              </Typography>
-              <Box sx={{md:4}}>
-                <EquipmentGrid onSuccess={setNotification} role={user?.role}/>
-              </Box>
-              <Typography variant='h5' component="h2" gutterBottom>
-                Work Orders
-              </Typography>
-              <Box sx={{md:4}}>
-                <OrderGrid onSuccess={setNotification} role={user?.role}/>
-              </Box>
-              <Typography variant='h5' component="h2" gutterBottom>
-                Reports
-              </Typography>
-              <Box sx={{md:4}}>
-                <ReportGrid onSuccess={setNotification} role={user?.role}/>
-              </Box>
-              {user?.role == 'Clinical Admin' && (<Typography variant='h5' component="h2" gutterBottom>
-                Users
-              </Typography>)}
-              {user?.role == 'Clinical Admin' && (<Box sx={{md:4}}>
-                <UserDataGrid onSuccess={setNotification} role={user?.role}/>
-              </Box>)}
-              <Typography variant='h5' component="h2" gutterBottom>
-                Analytics
-              </Typography>
-              <Box sx={{md:4}}>
-                <BusinessDataGrid onSuccess={setNotification} role={user?.role}/>
-              </Box>
+              
             </Container>
           } exact= {true}/>
+          <Route path='/hospital/:id' element= {<SigleHospital onSuccess={setNotification} role={user?.role}/>} exact={true}/>
+          <Route path='/analytics' element= {<AnalyticsPage onSuccess={setNotification} role={user?.role}/>} exact={true}/>
+          <Route path='/workorders' element= {<OrderGrid onSuccess={setNotification} role={user?.role}/>} exact={true}/>
+          <Route path='/reports' element= {<ReportGrid onSuccess={setNotification} role={user?.role}/>} exact={true}/>
+          {user?.role == 'Clinical Admin' && <Route path='/users' element= {<UserDataGrid onSuccess={setNotification} role={user?.role}/>} exact={true}/>}
+          <Route path='*' element= {<Typography variant="h5" component="h2" gutterBottom>
+                404
+              </Typography>}/>
         </Routes>
 
         <Snackbar open={Boolean(notification)} autoHideDuration = {4000} onClose={() => setNotification(null)}>

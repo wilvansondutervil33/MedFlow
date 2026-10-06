@@ -20,7 +20,7 @@ const baseColumns = [
 
 const STATUS_OPTIONS = ['Available', 'In-Use', 'Maintenance', 'Offline']
 
-function EquipmentGrid({onSuccess, role}){
+function EquipmentGrid({onSuccess, role, hospital_id}){
     const [equipments, setEquipments] = useState([])
     const [id, setId] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -66,7 +66,7 @@ function EquipmentGrid({onSuccess, role}){
         setLoading(true);
         try{
             const res = await apiClient.get('/equipments'); 
-            setEquipments(res.data);
+            setEquipments(res.data.filter(n => n.hospital_id == parseInt(hospital_id)));
             console.log(res)
             setError(null);
         }catch(e){

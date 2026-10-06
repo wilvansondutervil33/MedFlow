@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db, get_current_user, require_role
-from app.models import Equipment, User, UserRole
+from app.models import Equipment, User, UserRole, EquipmentStatus
 from app.schemas.equipment import EquipmentCreate, EquipmentRead, EquipmentUpdate
 
 router = APIRouter(prefix="/equipments", tags=["equipments"])
@@ -19,7 +19,7 @@ async def get_list_equipments(max_charge: Decimal | None = Query(
         db:AsyncSession =  Depends(get_db), _:User = Depends(get_current_user)) -> list[Equipment]:
     statement = select(Equipment)
     if max_charge is not None:
-        statement = statement.where(Equipment.charge_level < max_charge)
+        statement = statement.where(Equipment.charge_level < max_charge, Equipment.status != EquipmentStatus.OFFLINE)
     statement = statement.order_by(Equipment.id)
 
     res = await db.execute(statement)

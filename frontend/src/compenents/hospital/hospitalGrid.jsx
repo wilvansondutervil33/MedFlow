@@ -10,7 +10,13 @@ import apiClient from '../../api/client.js';
 
 const baseColumns = [
     {field: 'id', headername: 'ID', width:70, flex:1},
-    {field : 'name', headername: 'Name', width: 150, flex: 1},
+    {field : 'name', headername: 'Name', width: 150, flex: 1, 
+        renderCell: (params) => (
+        <Link href={`/hospital/${params.row.id}`} underline="hover">
+            {params.value}
+        </Link>
+    )
+    },
     {field: 'location_region', headername: 'Location Region', width: 160, flex: 1},
     {field: 'capacity', headername: "Capacity", width:120, type: 'number', flex: 1},
     {field: 'supervisor_id', headername: "Supervisor Id", width:120, type: 'number', flex: 1}

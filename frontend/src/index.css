@@ -30,6 +30,16 @@
   }
 }
 
+[data-theme="light"] {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+}
+
+[data-theme="dark"] {
+  --bg: #121212;
+  --text: #f0f0f0;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
@@ -52,6 +62,18 @@
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+button{
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
 }
 
 #root {

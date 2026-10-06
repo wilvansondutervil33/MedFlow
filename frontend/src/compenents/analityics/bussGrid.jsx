@@ -16,13 +16,7 @@ const colocationColumns = [
   { field: 'status', headerName: 'Status', width: 130 , flex: 1 },
   { field: 'technician_id', headerName: 'Technician ID', width: 110, type: 'number' , flex: 1 }]
 
-const lowcashColumns = [
-  { field: 'id', headerName: 'ID', width: 70 , flex: 1 },
-  { field: 'serial_number', headerName: 'Serial Number', width: 150 , flex: 1 },
-  { field: 'model', headerName: 'Model', width: 160 , flex: 1 },
-  { field: 'charge_level', headerName: 'Charge', width: 120, type: 'number' , flex: 1 },
-  { field: 'status', headerName: 'Status', width: 130 , flex: 1 },
-  { field: 'hospital_id', headerName: 'Hospital ID', width: 110, type: 'number' , flex: 1 }]
+
 
 const flagColumns = [
   { field: 'id', headerName: 'ID', width: 70 , flex: 1 },

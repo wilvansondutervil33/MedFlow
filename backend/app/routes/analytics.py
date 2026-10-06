@@ -90,7 +90,7 @@ async def reporting_lines(supervisor_id: int, db: AsyncSession = Depends(get_db)
                 .join(WorkOrder, WorkOrder.technician_id == Technician.id)
                 .join(Hospital, Hospital.id == Technician.hospital_id)
                 .where( 
-                        WorkOrder.status.not_in(["Completed", "Failed"]),
+                        WorkOrder.status.not_in(["Completed", "Failed"]), 
                         Hospital.supervisor_id == supervisor_id,
                     )
                 .distinct()
