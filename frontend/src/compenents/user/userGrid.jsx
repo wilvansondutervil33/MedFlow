@@ -129,10 +129,10 @@ function UserDataGrid({ onSuccess ,role}) {
   //loads data grid component if all goes well
   return (
     <Box>
-       {role == 'Clinical Admin' && (<Button variant="outlined" sx={{ mb: 2}} onClick={() => setaddDialogOpen(true)}>Add User</Button>)}
-    <Box sx={{ height: 400, width: '100%' }}>
+       <Button variant="outlined" sx={{ mb: 2}} onClick={() => setaddDialogOpen(true)}>Add User</Button>
+    {role == 'Clinical Admin' && (<Box sx={{ height: 400, width: '100%' }}>
       <DataGrid rows={users} columns={columns} getRowId={(row) => row.id} />
-    </Box>
+    </Box>)}
 
     <Dialog open={adddialogOpen} onClose={() => setaddDialogOpen(false)}>
       <DialogTitle>Add New User</DialogTitle>

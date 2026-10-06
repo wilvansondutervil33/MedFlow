@@ -28,7 +28,7 @@ async def get_report(rid:int, db:AsyncSession =  Depends(get_db), _:User = Depen
     return rep
 
 @router.post("", response_model=ReportCreate, status_code= status.HTTP_201_CREATED)
-async def create_report(payload: ReportCreate ,db: AsyncSession = Depends(get_db), _:User = Depends(require_role(UserRole.CLINICAL_ADMIN))) -> ServiceReport:
+async def create_report(payload: ReportCreate ,db: AsyncSession = Depends(get_db), _:User = Depends(require_role(UserRole.CLINICAL_ADMIN, UserRole.FIELD_TECHNICIAN))) -> ServiceReport:
     
     rep = ServiceReport(**payload.model_dump())
     db.add(rep)

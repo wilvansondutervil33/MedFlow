@@ -62,7 +62,7 @@ function OrderGrid({onSuccess, role}){
         }
     ]
 
-    const columns = role == 'Clinical Admin' ? [...baseColumns, ...actionColumns] : baseColumns;
+    const columns = role != 'Auditor' ? [...baseColumns, ...actionColumns] : baseColumns;
 
     async function fetchOrder() {
         setLoading(true);
@@ -171,14 +171,14 @@ function OrderGrid({onSuccess, role}){
                 <DialogTitle>Edit Work Order</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2} sx={{ mt: 1, minWidth: 300}}>
-                        <TextField label="Title" value={formValues.title} onChange={handleFieldChange('title')} />
+                        {role == 'Clinical Admin' && (<><TextField label="Title" value={formValues.title} onChange={handleFieldChange('title')} />
                         <TextField label="Technician ID" type="number" value={formValues.technician_id} onChange={handleFieldChange('technician_id')} />
                         <TextField label="Equipment ID" type="number" value={formValues.equipment_id} onChange={handleFieldChange('equipment_id')} />
                         <TextField select label="Priorty" value={formValues.priorty} onChange={handleFieldChange('priorty')}>
                             {PRIORITY_OPTIONS.map((option) => (
                                 <MenuItem key={option} value={option}>{option}</MenuItem>
                             ))}
-                        </TextField>
+                        </TextField></>)}
                         <TextField select label="Status" value={formValues.status} onChange={handleFieldChange('status')}>
                             {STATUS_OPTIONS.map((option) => (
                                 <MenuItem key={option} value={option}>{option}</MenuItem>

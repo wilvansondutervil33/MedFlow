@@ -1,9 +1,3 @@
-"""
-Robopulse Command Center
-Day 10 - shared pytest fixture: an isolated test database, a dependency-overriden FastAPI test client
-and JWT helpers for testing each RBAC role without hitting any real /auth/token endpoints on every test
-"""
-
 import os
 
 import pytest_asyncio
@@ -68,7 +62,7 @@ each one
 @pytest_asyncio.fixture
 async def seeded_users(db_session):
     users = {
-        "admin"  : User(username="test_admin", hashed_password=hash_password("pw"), role=UserRole.OPERATION_ADMIN),
+        "admin"  : User(username="test_admin", hashed_password=hash_password("pw"), role=UserRole.CLINICAL_ADMIN),
         "operator" : User(username="test_operator", hashed_password=hash_password("pw"), role=UserRole.FIELD_TECHNICIAN),
         "auditor" : User(username="test_auditor", hashed_password=hash_password("pw"), role=UserRole.AUDITOR),
     }
@@ -79,10 +73,7 @@ async def seeded_users(db_session):
        await db_session.refresh(user)
     return users
 
-"""
-Here I will create a miniman Facility row - many endpoints (creating a robot) require a valid
-facility_id in order to satisfy our foreign key constraints. 
-"""
+
 @pytest_asyncio.fixture
 async def seeded_hospital(db_session):
     hos = Hospital(name="Test Hospital", location_region="Test Region", capacity=10, supervisor_id=1)

@@ -11,8 +11,8 @@ import apiClient from '../../api/client.js';
 const colocationColumns = [
   { field: 'id', headerName: 'ID', width: 70 , type: 'number', flex: 1 },
   { field: 'title', headerName: 'Title', width: 150 , flex: 1 },
-  { field: 'priority', headerName: 'Priority', width: 160 , flex: 1 },
-  { field: 'atm_id', headerName: 'Atm ID', width: 120, type: 'number' , flex: 1 },
+  { field: 'priorty', headerName: 'Priority', width: 160 , flex: 1 },
+  { field: 'equipment_id', headerName: 'Equipment ID', width: 120, type: 'number' , flex: 1 },
   { field: 'status', headerName: 'Status', width: 130 , flex: 1 },
   { field: 'technician_id', headerName: 'Technician ID', width: 110, type: 'number' , flex: 1 }]
 
@@ -20,9 +20,9 @@ const lowcashColumns = [
   { field: 'id', headerName: 'ID', width: 70 , flex: 1 },
   { field: 'serial_number', headerName: 'Serial Number', width: 150 , flex: 1 },
   { field: 'model', headerName: 'Model', width: 160 , flex: 1 },
-  { field: 'cash_level', headerName: 'CASH', width: 120, type: 'number' , flex: 1 },
+  { field: 'charge_level', headerName: 'Charge', width: 120, type: 'number' , flex: 1 },
   { field: 'status', headerName: 'Status', width: 130 , flex: 1 },
-  { field: 'branch_id', headerName: 'Branch ID', width: 110, type: 'number' , flex: 1 }]
+  { field: 'hospital_id', headerName: 'Hospital ID', width: 110, type: 'number' , flex: 1 }]
 
 const flagColumns = [
   { field: 'id', headerName: 'ID', width: 70 , flex: 1 },
@@ -32,14 +32,14 @@ const flagColumns = [
   { field: 'supervisor_id', headerName: 'Supervisor ID', width: 110, type: 'number' , flex: 1 }]
 
 const metricsColumns = [
-  { field: 'model', headerName: 'ATM Models', width: 70 , flex: 1 },
+  { field: 'model', headerName: 'Equipment Models', width: 70 , flex: 1 },
   { field: 'completed', headerName: 'Completed', width: 150 , type: 'number', flex: 1 },
   { field: 'failed', headerName: 'Failed', width: 160 , type: 'number', flex: 1 }]
 
 const reportColumns = [
   { field: 'id', headerName: 'ID', width: 70 , flex: 1 },
   { field: 'name', headerName: 'Name', width: 150 , flex: 1 },
-  { field: 'branch_id', headerName: 'Branch ID', width: 110, type: 'number' , flex: 1 }]
+  { field: 'hospital_id', headerName: 'Hospital ID', width: 110, type: 'number' , flex: 1 }]
   
 //local state variables for tracking table rows, loading status, and network errors
 //to track the lifecycle of the async API request so the UI can render appropriately
@@ -157,7 +157,7 @@ function BusinessDataGrid({ onSuccess}) {
       {low && (
         <>
         <Typography variant="h5" component="h2" gutterBottom>
-          Low Cash ATM Alert
+          Low Charge Alert
         </Typography>
         <Box sx={{ height: 400, width: '100%' }}>
           <DataGrid rows={low} columns={lowcashColumns} getRowId={(row) => row.id} />
@@ -167,7 +167,7 @@ function BusinessDataGrid({ onSuccess}) {
       {flag && (
         <>
         <Typography variant="h5" component="h2" gutterBottom>
-          30% of ATM in Maintenance
+          30% of Eqiupment in Maintenance
         </Typography>
         <Box sx={{ height: 400, width: '100%' }}>
           <DataGrid rows={flag} columns={flagColumns} getRowId={(row) => row.id} />
@@ -177,7 +177,7 @@ function BusinessDataGrid({ onSuccess}) {
       {metr && (
         <>
         <Typography variant="h5" component="h2" gutterBottom>
-          ATM Completed / Failed ratio
+          Equipment Completed / Failed ratio
         </Typography>
         <Box sx={{ height: 400, width: '100%' }}>
           <DataGrid rows={metr} columns={metricsColumns} getRowId={(row) => row.model} />

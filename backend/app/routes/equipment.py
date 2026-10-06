@@ -11,9 +11,18 @@ from app.schemas.equipment import EquipmentCreate, EquipmentRead, EquipmentUpdat
 router = APIRouter(prefix="/equipments", tags=["equipments"])
 
 @router.get("", response_model=list[EquipmentRead], status_code= status.HTTP_200_OK)
-async def get_list_equipments(db:AsyncSession =  Depends(get_db), _:User = Depends(get_current_user)) -> list[Equipment]:
-    statment = select(Equipment)
-    res = await db.execute(statment)
+async def get_list_equipments(max_charge: Decimal | None = Query(
+        default=None,
+        ge=0,
+        le=100,
+        description="Only return equipments strictly below this charge level.",),
+        db:AsyncSession =  Depends(get_db), _:User = Depends(get_current_user)) -> list[Equipment]:
+    statement = select(Equipment)
+    if max_charge is not None:
+        statement = statement.where(Equipment.charge_level < max_charge)
+    statement = statement.order_by(Equipment.id)
+
+    res = await db.execute(statement)
     return list(res.scalars().all())
 
 @router.get("/{eid}", response_model=EquipmentRead, status_code= status.HTTP_200_OK)

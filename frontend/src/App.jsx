@@ -48,12 +48,12 @@ function Dashboard(){
               <Box sx={{md:4}}>
                 <ReportGrid onSuccess={setNotification} role={user?.role}/>
               </Box>
-              <Typography variant='h5' component="h2" gutterBottom>
+              {user?.role == 'Clinical Admin' && (<Typography variant='h5' component="h2" gutterBottom>
                 Users
-              </Typography>
-              <Box sx={{md:4}}>
+              </Typography>)}
+              {user?.role == 'Clinical Admin' && (<Box sx={{md:4}}>
                 <UserDataGrid onSuccess={setNotification} role={user?.role}/>
-              </Box>
+              </Box>)}
               <Typography variant='h5' component="h2" gutterBottom>
                 Analytics
               </Typography>

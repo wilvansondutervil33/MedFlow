@@ -5,7 +5,7 @@ from app.models import User, UserRole
 from app.security import hash_password
 
 async def seed_users() -> None:
-    async with AsyncSessionLocal() as session:
+    async with AsyncSessionLocal() as session: 
         session.add_all([
             User(username="admin", hashed_password=hash_password("AdminPass123!"), role=UserRole.CLINICAL_ADMIN),
             User(username="operator", hashed_password=hash_password("OperatorPass123!"), role=UserRole.FIELD_TECHNICIAN),

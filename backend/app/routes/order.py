@@ -28,7 +28,7 @@ async def get_order(oid:int, db:AsyncSession =  Depends(get_db), _:User = Depend
     return ord
 
 @router.post("", response_model=OrderCreate, status_code= status.HTTP_201_CREATED)
-async def create_order(payload: OrderCreate ,db: AsyncSession = Depends(get_db), _:User = Depends(require_role(UserRole.CLINICAL_ADMIN))) -> WorkOrder:
+async def create_order(payload: OrderCreate ,db: AsyncSession = Depends(get_db), _:User = Depends(require_role(UserRole.CLINICAL_ADMIN, UserRole.FIELD_TECHNICIAN))) -> WorkOrder:
     
     ord = WorkOrder(**payload.model_dump())
     db.add(ord)
@@ -41,7 +41,7 @@ async def create_order(payload: OrderCreate ,db: AsyncSession = Depends(get_db),
 async def update_order(oid:int, 
                        payload: OrderUpdate ,
                        db: AsyncSession = Depends(get_db), 
-                       _:User = Depends(require_role(UserRole.CLINICAL_ADMIN))) -> WorkOrder:
+                       _:User = Depends(require_role(UserRole.CLINICAL_ADMIN, UserRole.FIELD_TECHNICIAN))) -> WorkOrder:
     
     ord = await db.get(WorkOrder, oid)
 

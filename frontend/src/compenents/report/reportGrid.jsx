@@ -42,15 +42,15 @@ function ReportGrid({onSuccess, role}){
                             order_id: params.row.order_id,
                         })
                     seteditDialogOpen(true)}}/>,
-                    <GridActionsCellItem
-                        icon={<DeleteIcon/>}
-                        label="Delete"
-                        onClick={() => handleDelete(params.row.id)}/>
+                    // <GridActionsCellItem
+                    //     icon={<DeleteIcon/>}
+                    //     label="Delete"
+                    //     onClick={() => handleDelete(params.row.id)}/>
                 ]
         }
     ]
 
-    const columns = role == 'Clinical Admin' ? [...baseColumns, ...actionColumns] : baseColumns;
+    const columns = role != 'Auditor' ? [...baseColumns, ...actionColumns] : baseColumns;
 
     async function fetchReport() {
         setLoading(true);
@@ -80,12 +80,13 @@ function ReportGrid({onSuccess, role}){
                 ...formValues,
             order_id: Number(formValues.order_id),
             });
-            setaddDialogOpen(false);
             onSuccess(`Report created.`);
             setFormValues({filr_url: '', note: '', order_id: ''});
-            await fetchReport(); //see the table data refreshed with the new robot
-        } catch {
-            //a real app would surface this inline in the dialog
+            await fetchReport(); 
+        } catch (e){
+            setError(e.response?.data)
+        } finally {
+            setaddDialogOpen(false);
         }
     }
 
@@ -123,7 +124,7 @@ function ReportGrid({onSuccess, role}){
 
     return(
         <Box>
-            {role == 'Clinical Admin' && (<Button variant="outlined" sx={{ mb: 2}} onClick={() => setaddDialogOpen(true)}>Add Report</Button>)}
+            {role != 'Auditor' && (<Button variant="outlined" sx={{ mb: 2}} onClick={() => setaddDialogOpen(true)}>Add Report</Button>)}
             <Box sx={{height:400, width: '100%', display: "flex", justifyContent: 'space-around', alignItems: 'center'}}>
                 <DataGrid rows={reports} columns={columns} getRowId={(row) => row.id} />
             </Box>
