@@ -19,13 +19,15 @@ function Reports () {
       setLoading(true);
       try {
         const listB = await apiClient.get('/hospitals')
-        
+        const byId = new Map();
+
         for (let i = 0; i < listB.data.length; i++){
-            supId = listB.data[i].supervisor_id
+            const supId = listB.data[i].supervisor_id
             console.log(supId)
-          const response = await apiClient.get(`/report/${supId}`);
-          setRepos([...repo, ...response.data]);
+          const response = await apiClient.get(`/analytics/report/${supId}`);
+          response.data.forEach((t) => byId.set(t.id, t));
         }
+        setRepos([...byId.values()]);
         setError(null);
         console.log(repo)
       } catch (e){
@@ -51,7 +53,7 @@ function Reports () {
                       Report
                     </Typography>
                     <Box sx={{ height: 400, width: '100%' }}>
-                      <DataGrid rows={repo} columns={reportColumns} getRowId={(row) => row.model} />
+                      <DataGrid rows={repo} columns={reportColumns} getRowId={(row) => row.id} />
                     </Box>
                     </>
                   )}

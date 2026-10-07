@@ -45,7 +45,7 @@ function SigleHospital({ onSuccess , role}){
                     {hospital.name}
                 </Typography>
                 <Box sx={{ mb: 4}}>
-                    <EquipmentGrid onSuccess={onSuccess} role={role} hospital_id= {id}/>
+                    <EquipmentGrid onSuccess={onSuccess} role={role} hospital= {hospital}/>
                 </Box>
             </Container>
         </>

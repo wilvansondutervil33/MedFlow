@@ -44,7 +44,7 @@ function Flag () {
             {flag && (
                 <>
                     <Typography variant="h5" component="h2" gutterBottom>
-                        Co-Location
+                        30% of Equipment in Maintenance 
                     </Typography>
                     <Box sx={{ height: 400, width: '100%' }}>
                         <DataGrid rows={flag} columns={flagColumns} getRowId={(row) => row.id} />

@@ -5,11 +5,18 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ReportIcon from '@mui/icons-material/Report';
 import PersonIcon from '@mui/icons-material/Person';
 import ThemeToggle from '../toggle/Themetoggle';
+import { useNavigate } from 'react-router-dom';
 
 //added username, role, onLogout to function params
 function AppHeader({username, role, onLogout, children}) {
 
   const drawerWidth = 240;
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    onLogout();
+    navigate('/', { replace: true });
+  };
+  
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -112,7 +119,7 @@ function AppHeader({username, role, onLogout, children}) {
         <List sx={{paddingBottom:'40px'}}>
           <ListItem disablePadding>
             <ListItemButton>
-              <Button color="inherit" onClick={onLogout}>Log Out</Button>
+              <Button color="inherit" onClick={handleLogout}>Log Out</Button>
             </ListItemButton>     
           </ListItem>
 

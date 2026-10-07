@@ -4,9 +4,10 @@ import { GridActionsCellItem } from '@mui/x-data-grid';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Link from '@mui/material/Link';
-import { Alert, Box, CircularProgress, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField } from '@mui/material';
+import { Alert, Box, CircularProgress, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField, Paper, List, ListItem, ListItemText} from '@mui/material';
 import apiClient from '../../api/client.js';
-//import PieChart from '../chart/piechart.jsx';
+import PieChart from '../chart/piechart.jsx';
+
 
 const baseColumns = [
     {field: 'id', headername: 'ID', width:70, flex:1},
@@ -20,7 +21,7 @@ const baseColumns = [
 
 const STATUS_OPTIONS = ['Available', 'In-Use', 'Maintenance', 'Offline']
 
-function EquipmentGrid({onSuccess, role, hospital_id}){
+function EquipmentGrid({onSuccess, role, hospital}){
     const [equipments, setEquipments] = useState([])
     const [id, setId] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -66,7 +67,7 @@ function EquipmentGrid({onSuccess, role, hospital_id}){
         setLoading(true);
         try{
             const res = await apiClient.get('/equipments'); 
-            setEquipments(res.data.filter(n => n.hospital_id == parseInt(hospital_id)));
+            setEquipments(res.data.filter(n => n.hospital_id == parseInt(hospital.id)));
             console.log(res)
             setError(null);
         }catch(e){
@@ -137,6 +138,15 @@ function EquipmentGrid({onSuccess, role, hospital_id}){
     return(
         <Box> 
             {role == 'Clinical Admin' && (<Button variant="outlined" sx={{ mb: 2}} onClick={() => setaddDialogOpen(true)}>Add Equipment</Button>)}
+            <Paper sx={{padding:'4px', display:'flex', justifyContent:'space-around', margin: '10px'}}>
+                <List>
+                    <ListItemText primary={`Region: ${hospital.location_region}`}/>
+                    <ListItemText primary={`Capacity: ${hospital.capacity}`}/>
+                    <ListItemText primary={`Spervisor ID: ${hospital.supervisor_id}`}/>
+
+                </List>
+                <PieChart data ={equipments}/>
+            </Paper>
             <Box sx={{height:400, width: '100%', display: "flex", justifyContent: 'space-around', alignItems: 'center'}}>
                 <DataGrid rows={equipments} columns={columns} getRowId={(row) => row.id} />
             </Box>
@@ -170,7 +180,7 @@ function EquipmentGrid({onSuccess, role, hospital_id}){
                         <TextField label="Model" value={formValues.model} onChange={handleFieldChange('model')} />
                         <TextField label="Charge Level" type="number" value={formValues.charge_level} onChange={handleFieldChange('charge_level')} />
                         <TextField label="Hospital ID" type="number" value={formValues.hospital_id} onChange={handleFieldChange('hospital_id')} />
-                        <TextField label="Status" value={formValues.status} onChange={handleFieldChange('status')}>
+                        <TextField select label="Status" value={formValues.status} onChange={handleFieldChange('status')}>
                             {STATUS_OPTIONS.map((option) => (
                                 <MenuItem key={option} value={option}>{option}</MenuItem>
                             ))}

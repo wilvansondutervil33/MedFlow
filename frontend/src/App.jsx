@@ -4,12 +4,10 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import LoginForm from './compenents/auth/LoginForm.jsx';
 import HospitalGrid from './compenents/hospital/hospitalGrid.jsx';
-import EquipmentGrid from './compenents/equipment/equipmentGrid.jsx';
 import OrderGrid from './compenents/order/orderGrid.jsx';
 import ReportGrid from './compenents/report/reportGrid.jsx';
 import UserDataGrid from './compenents/user/userGrid.jsx';
 import SigleHospital from './compenents/hospital/singlehosital.jsx';
-import BusinessDataGrid from './compenents/analityics/bussGrid.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import AppHeader from './compenents/layout/AppHeader.jsx';
 import AnalyticsPage from './compenents/analityics/analityicsGrid.jsx';

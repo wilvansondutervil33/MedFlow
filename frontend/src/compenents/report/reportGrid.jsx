@@ -50,7 +50,7 @@ function ReportGrid({onSuccess, role}){
         }
     ]
 
-    const columns = role != 'Auditor' ? [...baseColumns, ...actionColumns] : baseColumns;
+    const columns = role == 'Clinical Admin' ? [...baseColumns, ...actionColumns] : baseColumns;
 
     async function fetchReport() {
         setLoading(true);

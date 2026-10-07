@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Link from '@mui/material/Link';
 import { Alert, Box, CircularProgress, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField } from '@mui/material';
 import apiClient from '../../api/client.js';
-//import PieChart from '../chart/piechart.jsx';
+import PieChart from '../chart/piechart.jsx';
 
 const baseColumns = [
     {field: 'id', headername: 'ID', width:70, flex:1},
@@ -24,6 +24,7 @@ const baseColumns = [
 
 function HospitalGrid({onSuccess, role}){
     const [hospitals, setHospitals] = useState([])
+    const [eqi, setEquipments] = useState([])
     const [id, setId] = useState(0)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null);
@@ -66,6 +67,8 @@ function HospitalGrid({onSuccess, role}){
         try{
             const res = await apiClient.get('/hospitals');
             setHospitals(res.data);
+            const ress = await apiClient.get('/equipments'); 
+            setEquipments(ress.data);
             setError(null);
         }catch(e){
             console.log("Could not fetch your information")
@@ -134,6 +137,7 @@ function HospitalGrid({onSuccess, role}){
 
     return(
         <Box>
+            <PieChart data={eqi}/>
             {role == 'Clinical Admin' && (<Button variant="outlined" sx={{ mb: 2}} onClick={() => setaddDialogOpen(true)}>Add Hospital</Button>)}
             <Box sx={{height:400, width: '100%', display: "flex", justifyContent: 'space-around', alignItems: 'center'}}>
                 <DataGrid rows={hospitals} columns={columns} getRowId={(row) => row.id} />

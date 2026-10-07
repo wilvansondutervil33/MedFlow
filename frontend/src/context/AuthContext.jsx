@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import apiClient from "../api/client";
 
+
 const AuthContext = createContext(null);
 
 function decodeToken(token){
