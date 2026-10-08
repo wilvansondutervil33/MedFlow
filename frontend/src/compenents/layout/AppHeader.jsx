@@ -59,7 +59,7 @@ function AppHeader({username, role, onLogout, children}) {
         
         <List sx={{paddingTop: '40px'}}>
 
-          <Link href="/" sx={{ textDecoration: 'none', color: 'Black'}}>
+          <Link href="/" sx={{ textDecoration: 'none', color: 'text.primary'}}>
             <ListItem disablePadding>
                 <ListItemButton>
                   <ListItemIcon>
@@ -70,7 +70,7 @@ function AppHeader({username, role, onLogout, children}) {
             </ListItem>
           </Link>
 
-          <Link href="/analytics" sx={{ textDecoration: 'none', color: 'Black'}}>
+          <Link href="/analytics" sx={{ textDecoration: 'none', color: 'text.primary'}}>
             <ListItem disablePadding>
                 <ListItemButton>
                   <ListItemIcon>
@@ -81,7 +81,7 @@ function AppHeader({username, role, onLogout, children}) {
             </ListItem>
           </Link>
 
-          <Link href="/workorders" sx={{ textDecoration: 'none', color: 'Black'}}>
+          <Link href="/workorders" sx={{ textDecoration: 'none', color: 'text.primary'}}>
             <ListItem disablePadding>
                 <ListItemButton>
                   <ListItemIcon>
@@ -92,7 +92,7 @@ function AppHeader({username, role, onLogout, children}) {
             </ListItem>
           </Link>
 
-          <Link href="/reports" sx={{ textDecoration: 'none', color: 'Black'}}>
+          <Link href="/reports" sx={{ textDecoration: 'none', color: 'text.primary'}}>
             <ListItem disablePadding>
                 <ListItemButton>
                   <ListItemIcon>
@@ -103,7 +103,7 @@ function AppHeader({username, role, onLogout, children}) {
             </ListItem>
           </Link>
 
-          {role == 'Operations Admin' && <Link href="/users" sx={{ textDecoration: 'none', color: 'Black'}}>
+          {role == 'Clinical Admin' && <Link href="/users" sx={{ textDecoration: 'none', color: 'text.primary'}}>
             <ListItem disablePadding>
                 <ListItemButton>
                   <ListItemIcon>
