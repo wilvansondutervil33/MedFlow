@@ -34,7 +34,7 @@ from asyncpg.pgproto.pgproto cimport (
 
 from asyncpg.pgproto cimport pgproto
 from asyncpg.protocol cimport cpythonx
-from asyncpg.protocol cimport recordcapi
+from asyncpg.protocol cimport record
 
 from libc.stdint cimport int8_t, uint8_t, int16_t, uint16_t, \
                          int32_t, uint32_t, int64_t, uint64_t, \
@@ -46,7 +46,6 @@ from asyncpg import types as apg_types
 from asyncpg import exceptions as apg_exc
 
 from asyncpg.pgproto cimport hton
-from asyncpg.protocol.record import Record, RecordDescriptor
 
 
 include "consts.pxi"
@@ -136,15 +135,20 @@ cdef class BaseProtocol(CoreProtocol):
             self.is_reading = False
             self.transport.pause_reading()
 
+    @cython.iterable_coroutine
     async def prepare(self, stmt_name, query, timeout,
                       *,
                       PreparedStatementState state=None,
                       ignore_custom_codec=False,
                       record_class):
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
+        timeout = self._get_timeout_impl(timeout)
 
         waiter = self._new_waiter(timeout)
         try:
@@ -160,6 +164,7 @@ cdef class BaseProtocol(CoreProtocol):
         finally:
             return await waiter
 
+    @cython.iterable_coroutine
     async def bind_execute(
         self,
         state: PreparedStatementState,
@@ -169,10 +174,14 @@ cdef class BaseProtocol(CoreProtocol):
         return_extra: bool,
         timeout,
     ):
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
+        timeout = self._get_timeout_impl(timeout)
         args_buf = state._encode_bind_msg(args)
 
         waiter = self._new_waiter(timeout)
@@ -196,6 +205,7 @@ cdef class BaseProtocol(CoreProtocol):
         finally:
             return await waiter
 
+    @cython.iterable_coroutine
     async def bind_execute_many(
         self,
         state: PreparedStatementState,
@@ -204,10 +214,14 @@ cdef class BaseProtocol(CoreProtocol):
         timeout,
         return_rows: bool,
     ):
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
+        timeout = self._get_timeout_impl(timeout)
         timer = Timer(timeout)
 
         # Make sure the argument sequence is encoded lazily with
@@ -253,20 +267,22 @@ cdef class BaseProtocol(CoreProtocol):
         finally:
             return await waiter
 
+    @cython.iterable_coroutine
     async def bind(self, PreparedStatementState state, args,
                    str portal_name, timeout):
 
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
+        timeout = self._get_timeout_impl(timeout)
         args_buf = state._encode_bind_msg(args)
 
         waiter = self._new_waiter(timeout)
         try:
-            if not state.prepared:
-                self._send_parse_message(state.name, state.query)
-
             self._bind(
                 portal_name,
                 state.name,
@@ -280,14 +296,19 @@ cdef class BaseProtocol(CoreProtocol):
         finally:
             return await waiter
 
+    @cython.iterable_coroutine
     async def execute(self, PreparedStatementState state,
                       str portal_name, int limit, return_extra,
                       timeout):
 
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
+        timeout = self._get_timeout_impl(timeout)
 
         waiter = self._new_waiter(timeout)
         try:
@@ -305,12 +326,17 @@ cdef class BaseProtocol(CoreProtocol):
         finally:
             return await waiter
 
+    @cython.iterable_coroutine
     async def close_portal(self, str portal_name, timeout):
 
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
+        timeout = self._get_timeout_impl(timeout)
 
         waiter = self._new_waiter(timeout)
         try:
@@ -323,11 +349,19 @@ cdef class BaseProtocol(CoreProtocol):
         finally:
             return await waiter
 
+    @cython.iterable_coroutine
     async def query(self, query, timeout):
-        timeout = self._get_timeout(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
+        # query() needs to call _get_timeout instead of _get_timeout_impl
+        # for consistent validation, as it is called differently from
+        # prepare/bind/execute methods.
+        timeout = self._get_timeout(timeout)
 
         waiter = self._new_waiter(timeout)
         try:
@@ -340,12 +374,17 @@ cdef class BaseProtocol(CoreProtocol):
         finally:
             return await waiter
 
+    @cython.iterable_coroutine
     async def copy_out(self, copy_stmt, sink, timeout):
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
 
+        timeout = self._get_timeout_impl(timeout)
         timer = Timer(timeout)
 
         # The copy operation is guarded by a single timeout
@@ -389,6 +428,7 @@ cdef class BaseProtocol(CoreProtocol):
 
         return status_msg
 
+    @cython.iterable_coroutine
     async def copy_in(self, copy_stmt, reader, data,
                       records, PreparedStatementState record_stmt, timeout):
         cdef:
@@ -396,11 +436,15 @@ cdef class BaseProtocol(CoreProtocol):
             ssize_t num_cols
             Codec codec
 
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
 
+        timeout = self._get_timeout_impl(timeout)
         timer = Timer(timeout)
 
         waiter = self._new_waiter(timer.get_remaining_budget())
@@ -510,13 +554,8 @@ cdef class BaseProtocol(CoreProtocol):
             else:
                 raise apg_exc.InternalClientError('TimoutError was not raised')
 
-        except (Exception, asyncio.CancelledError):
-            # CopyFail is limited to 10000 bytes, including its length and
-            # trailing NUL. Use a fixed reason so formatting or encoding the
-            # application exception cannot break COPY cleanup. The original
-            # exception is re-raised below.
-            self._write_copy_fail_msg(
-                'COPY aborted due to an exception in input generator')
+        except (Exception, asyncio.CancelledError) as e:
+            self._write_copy_fail_msg(str(e))
             self._request_cancel()
             # Make asyncio shut up about unretrieved QueryCanceledError
             waiter.add_done_callback(lambda f: f.exception())
@@ -528,9 +567,13 @@ cdef class BaseProtocol(CoreProtocol):
 
         return status_msg
 
+    @cython.iterable_coroutine
     async def close_statement(self, PreparedStatementState state, timeout):
-        timeout = self._get_timeout_impl(timeout)
-        timeout = await self._wait_for_cancellation(timeout)
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
 
         self._check_state()
 
@@ -539,6 +582,7 @@ cdef class BaseProtocol(CoreProtocol):
                 'cannot close prepared statement; refs == {} != 0'.format(
                     state.refs))
 
+        timeout = self._get_timeout_impl(timeout)
         waiter = self._new_waiter(timeout)
         try:
             self._close(state.name, False)  # network op
@@ -556,15 +600,7 @@ cdef class BaseProtocol(CoreProtocol):
         return not self.closing and self.con_status == CONNECTION_OK
 
     def abort(self):
-        # Always finish pending cancel waiters. close() sets closing=True
-        # before awaiting them, so a later abort() must still unblock
-        # those futures and drop the transport.
-        self._complete_cancel_waiters()
         if self.closing:
-            if self.transport is not None:
-                transport = self.transport
-                self.transport = None
-                transport.abort()
             return
         self.closing = True
         self._handle_waiter_on_connection_lost(None)
@@ -572,46 +608,46 @@ cdef class BaseProtocol(CoreProtocol):
         self.transport.abort()
         self.transport = None
 
+    @cython.iterable_coroutine
     async def close(self, timeout):
         if self.closing:
             return
 
         self.closing = True
-        close_waiter = None
+
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
+
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
+
+        if self.waiter is not None:
+            # If there is a query running, cancel it
+            self._request_cancel()
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
+            if self.cancel_waiter is not None:
+                await self.cancel_waiter
+
+        assert self.waiter is None
+
+        timeout = self._get_timeout_impl(timeout)
+
+        # Ask the server to terminate the connection and wait for it
+        # to drop.
+        self.waiter = self._new_waiter(timeout)
+        self._terminate()
         try:
-            timeout = self._get_timeout_impl(timeout)
-            # Cancellation and the final disconnect share one deadline.
-            async with compat.timeout(timeout):
-                await self._drain_cancels()
-
-                # Transport loss completes the cancellation futures too.
-                # There will be no further disconnect notification to await.
-                if self.con_status != CONNECTION_OK or self.transport is None:
-                    return
-
-                assert self.waiter is None
-
-                # The timeout context also covers errors while sending
-                # Terminate; do not start a separate query timeout timer.
-                close_waiter = self._new_waiter(None)
-                self._terminate()
-                try:
-                    await close_waiter
-                except ConnectionResetError:
-                    # On Windows the transport may raise this instead of
-                    # calling protocol.connection_lost().
-                    pass
+            await self.waiter
+        except ConnectionResetError:
+            # There appears to be a difference in behaviour of asyncio
+            # in Windows, where, instead of calling protocol.connection_lost()
+            # a ConnectionResetError will be thrown into the task.
+            pass
         finally:
-            if close_waiter is not None and not close_waiter.done():
-                close_waiter.cancel()
-            if self.timeout_handle is not None:
-                self.timeout_handle.cancel()
-                self.timeout_handle = None
-            self._handle_waiter_on_connection_lost(None)
-            if self.transport is not None:
-                transport = self.transport
-                self.transport = None
-                transport.abort()
+            self.waiter = None
+            self.transport.abort()
 
     def _request_cancel(self):
         self.cancel_waiter = self.create_future()
@@ -621,8 +657,7 @@ cdef class BaseProtocol(CoreProtocol):
         if con is not None:
             # if 'con' is None it means that the connection object has been
             # garbage collected and that the transport will soon be aborted.
-            con._cancel_current_command(
-                self.cancel_sent_waiter, self.cancel_waiter)
+            con._cancel_current_command(self.cancel_sent_waiter)
         else:
             self.loop.call_exception_handler({
                 'message': 'asyncpg.Protocol has no reference to its '
@@ -661,42 +696,15 @@ cdef class BaseProtocol(CoreProtocol):
     def _create_future_fallback(self):
         return asyncio.Future(loop=self.loop)
 
-    cdef _complete_cancel_waiters(self):
-        if (self.cancel_sent_waiter is not None and
-                not self.cancel_sent_waiter.done()):
-            self.cancel_sent_waiter.set_result(None)
-        self.cancel_sent_waiter = None
-        if self.cancel_waiter is not None and not self.cancel_waiter.done():
-            self.cancel_waiter.set_result(None)
-        self.cancel_waiter = None
-
-    async def _drain_cancels(self):
-        await self._wait_for_cancellation()
-        if self.waiter is not None:
-            # If there is a query running, cancel it
-            self._request_cancel()
-            await self._wait_for_cancellation()
-
     cdef _handle_waiter_on_connection_lost(self, cause):
         if self.waiter is not None and not self.waiter.done():
-            msg = 'connection was closed in the middle of operation'
-            if (self.result_type == RESULT_FAILED and
-                    isinstance(self.result, dict)):
-                # The server sent an ErrorResponse and then closed the
-                # connection without a ReadyForQuery (a FATAL error, or
-                # pgbouncer's query_wait_timeout).  Do not lose it.
-                server_exc = apg_exc_base.PostgresError.new(
-                    self.result, query=self.last_query)
-                if cause is not None:
-                    server_exc.__cause__ = cause
-                cause = server_exc
-                msg = '{}: {}'.format(msg, server_exc.args[0])
-            exc = apg_exc.ConnectionDoesNotExistError(msg)
+            exc = apg_exc.ConnectionDoesNotExistError(
+                'connection was closed in the middle of '
+                'operation')
             if cause is not None:
                 exc.__cause__ = cause
             self.waiter.set_exception(exc)
         self.waiter = None
-        self._complete_cancel_waiters()
 
     cdef _set_server_parameter(self, name, val):
         self.settings.add_setting(name, val)
@@ -743,33 +751,13 @@ cdef class BaseProtocol(CoreProtocol):
             self.cancel_sent_waiter is not None
         )
 
-    async def _wait_for_cancellation(self, timeout=None):
-        if not self._is_cancelling():
-            return timeout
-
-        started = self.loop.time()
-        try:
-            async with compat.timeout(timeout):
-                if self.cancel_sent_waiter is not None:
-                    await asyncio.shield(self.cancel_sent_waiter)
-                    self.cancel_sent_waiter = None
-                if self.cancel_waiter is not None:
-                    await asyncio.shield(self.cancel_waiter)
-        except asyncio.TimeoutError:
-            # The old query may still be running.  A new query cannot use
-            # this connection unless the cancellation is acknowledged.
-            con = self.get_connection()
-            if con is not None:
-                con.terminate()
-            else:
-                self.abort()
-            raise
-
-        if timeout is not None:
-            timeout -= self.loop.time() - started
-            if timeout <= 0:
-                raise asyncio.TimeoutError()
-        return timeout
+    @cython.iterable_coroutine
+    async def _wait_for_cancellation(self):
+        if self.cancel_sent_waiter is not None:
+            await self.cancel_sent_waiter
+            self.cancel_sent_waiter = None
+        if self.cancel_waiter is not None:
+            await self.cancel_waiter
 
     cdef _coreproto_error(self):
         try:
@@ -963,7 +951,6 @@ cdef class BaseProtocol(CoreProtocol):
                 else:
                     self.waiter.set_exception(exc)
             self.waiter = None
-            self._complete_cancel_waiters()
         else:
             # The connection was lost because it was
             # terminated or due to another error;
@@ -990,7 +977,6 @@ cdef class BaseProtocol(CoreProtocol):
 
     def connection_made(self, transport):
         self.transport = transport
-        self._is_ssl = transport.get_extra_info('ssl_object') is not None
 
         sock = transport.get_extra_info('socket')
         if (sock is not None and
@@ -1063,14 +1049,17 @@ def _create_record(object mapping, tuple elems):
         int32_t i
 
     if mapping is None:
-        desc = RecordDescriptor({}, ())
+        desc = record.ApgRecordDesc_New({}, ())
     else:
-        desc = RecordDescriptor(
+        desc = record.ApgRecordDesc_New(
             mapping, tuple(mapping) if mapping else ())
 
-    rec = desc.make_record(Record, len(elems))
+    rec = record.ApgRecord_New(Record, desc, len(elems))
     for i in range(len(elems)):
         elem = elems[i]
         cpython.Py_INCREF(elem)
-        recordcapi.ApgRecord_SET_ITEM(rec, i, elem)
+        record.ApgRecord_SET_ITEM(rec, i, elem)
     return rec
+
+
+Record = <object>record.ApgRecord_InitTypes()

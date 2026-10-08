@@ -79,7 +79,6 @@ cdef class CoreProtocol:
         str _execute_stmt_name
 
         ConnectionStatus con_status
-        readonly bint _auth_received
         ProtocolState state
         TransactionStatus xact_status
 

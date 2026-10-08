@@ -11,7 +11,7 @@ import hashlib
 include "scram.pyx"
 
 
-AUTH_METHOD_NAME = {
+cdef dict AUTH_METHOD_NAME = {
     AUTH_REQUIRED_KERBEROS: 'kerberosv5',
     AUTH_REQUIRED_PASSWORD: 'password',
     AUTH_REQUIRED_PASSWORDMD5: 'md5',
@@ -32,7 +32,6 @@ cdef class CoreProtocol:
         self.auth_msg = None
         self.con_params = con_params
         self.con_status = CONNECTION_BAD
-        self._auth_received = False
         self.state = PROTOCOL_IDLE
         self.xact_status = PQTRANS_IDLE
         self.encoding = 'utf-8'
@@ -314,10 +313,6 @@ cdef class CoreProtocol:
             # ErrorResponse
             self._parse_msg_error_response(True)
 
-        elif mtype == b'1':
-            # ParseComplete, in case `_bind()` is reparsing
-            self.buffer.discard_message()
-
         elif mtype == b'2':
             # BindComplete
             self.buffer.discard_message()
@@ -574,7 +569,6 @@ cdef class CoreProtocol:
 
         if status == AUTH_SUCCESSFUL:
             # AuthenticationOk
-            self._auth_received = True
             self.result_type = RESULT_OK
 
         elif status == AUTH_REQUIRED_PASSWORD:
@@ -637,7 +631,7 @@ cdef class CoreProtocol:
                 self.result_type = RESULT_FAILED
                 self.result = apg_exc.InterfaceError(
                     'could not verify server signature for '
-                    'SCRAM authentication: scram-sha-256',
+                    'SCRAM authentciation: scram-sha-256',
                 )
             self.scram = None
 
@@ -675,7 +669,7 @@ cdef class CoreProtocol:
             WriteBuffer msg
 
         msg = WriteBuffer.new_message(b'p')
-        msg.write_bytestring((self.password or '').encode(self.encoding))
+        msg.write_bytestring(self.password.encode(self.encoding))
         msg.end_message()
 
         return msg
@@ -700,7 +694,7 @@ cdef class CoreProtocol:
         cdef:
             WriteBuffer msg
 
-        # use the first supported advertised mechanism
+        # use the first supported advertized mechanism
         self.scram = SCRAMAuthentication(sasl_auth_methods[0])
         # this involves a call and response with the server
         msg = WriteBuffer.new_message(b'p')
@@ -1235,5 +1229,5 @@ cdef class CoreProtocol:
         pass
 
 
-SYNC_MESSAGE = bytes(WriteBuffer.new_message(b'S').end_message())
-FLUSH_MESSAGE = bytes(WriteBuffer.new_message(b'H').end_message())
+cdef bytes SYNC_MESSAGE = bytes(WriteBuffer.new_message(b'S').end_message())
+cdef bytes FLUSH_MESSAGE = bytes(WriteBuffer.new_message(b'H').end_message())

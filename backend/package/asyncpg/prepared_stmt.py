@@ -6,7 +6,6 @@
 
 
 import json
-import typing
 
 from . import connresource
 from . import cursor
@@ -128,7 +127,7 @@ class PreparedStatement(connresource.ConnectionResource):
 
         :param args: Query arguments.
         :param analyze: If ``True``, the statement will be executed and
-                        the run time statistics added to the return value.
+                        the run time statitics added to the return value.
 
         :return: An object representing the execution plan.  This value
                  is actually a deserialized JSON output of the SQL
@@ -233,7 +232,7 @@ class PreparedStatement(connresource.ConnectionResource):
         )
 
     @connresource.guarded
-    async def executemany(self, args, *, timeout: typing.Optional[float]=None):
+    async def executemany(self, args, *, timeout: float=None):
         """Execute the statement for each sequence of arguments in *args*.
 
         :param args: An iterable containing sequences of arguments.

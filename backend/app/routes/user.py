@@ -10,7 +10,7 @@ from app.schemas.user import UserRead, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-@router.get("/", response_model=list[UserRead], status_code= status.HTTP_200_OK)
+@router.get("", response_model=list[UserRead], status_code= status.HTTP_200_OK)
 async def get_list_users(db:AsyncSession =  Depends(get_db), _:User = Depends(get_current_user)) -> list[User]:
     statment = select(User)
     res = await db.execute(statment)
